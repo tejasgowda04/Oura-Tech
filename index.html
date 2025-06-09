@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oura Tech - Premium Tech Courses Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyD5B4x6FGf8fa08zDAyuLr-QuBbKU6oi6U",
+  authDomain: "oura-tech-auth.firebaseapp.com",
+  projectId: "oura-tech-auth",
+  storageBucket: "oura-tech-auth.firebasestorage.app",
+  messagingSenderId: "681353386666",
+  appId: "1:681353386666:web:f45d3e2aa33ae458718ed3",
+  measurementId: "G-7DHKLDSY5Y"
+};
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+</script>
+
+
+    <style>
+        /* Custom animations and elements that need more control than Tailwind provides */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .course-card:hover .course-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .course-overlay {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6 0%, #10B981 50%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% 100%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Custom checkbox for terms */
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3B82F6;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        
+        .custom-checkbox:checked {
+            background-color: #3B82F6;
+        }
+        
+        .custom-checkbox:checked::after {
+            content: '\2713';
+            color: white;
+            font-size: 12px;
+        }
+        
+        /* Modal animations */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white shadow-sm z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center">
+                        <span class="text-indigo-600 text-2xl font-bold"><i class="fas fa-laptop-code mr-2"></i>Oura Tech</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-indigo-600 transition">Home</a>
+                    <a href="#courses" class="text-gray-700 hover:text-indigo-600 transition">Courses</a>
+                    <a href="#about" class="text-gray-700 hover:text-indigo-600 transition">About</a>
+                    <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition">Testimonials</a>
+                    <a href="#contact" class="text-gray-700 hover:text-indigo-600 transition">Contact</a>
+                    <button onclick="openLoginModal()" class="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-600 hover:text-white transition">Login</button>
+                    <button onclick="openSignupModal()" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition">Sign Up</button>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-700">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg rounded-b-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Home</a>
+                <a href="#courses" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Courses</a>
+                <a href="#about" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">About</a>
+                <a href="#testimonials" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Testimonials</a>
+                <a href="#contact" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Contact</a>
+                <button onclick="openLoginModal()" class="w-full text-left block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Login</button>
+                <button onclick="openSignupModal()" class="w-full block px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-24 pb-16 md:pt-32 md:pb-24 px-4 md:px-0 bg-gradient-to-r from-indigo-50 to-blue-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-12 md:mb-0">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">Master <span class="gradient-text">In-Demand Tech Skills</span> with Oura</h1>
+                <p class="text-lg text-gray-600 mb-8">Join 250,000+ learners and build your future with our industry-leading tech courses taught by experts from top companies.</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="openSignupModal()" class="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition transform hover:-translate-y-1 font-medium text-lg shadow-lg">Start Learning Free</button>
+                    <button class="px-8 py-3 bg-white text-indigo-600 rounded-lg hover:bg-gray-100 transition transform hover:-translate-y-1 font-medium text-lg shadow-lg flex items-center justify-center">
+                        <i class="fas fa-play mr-2"></i> Watch Demo
+                    </button>
+                </div>
+                <div class="mt-8 flex items-center">
+                    <div class="flex -space-x-3">
+                        <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/12.jpg" alt="Student">
+                        <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Student">
+                        <img class="w-10 h-10 rounded-full border-2 border-white" src="https://randomuser.me/api/portraits/women/45.jpg" alt="Student">
+                    </div>
+                    <p class="ml-4 text-gray-600"><span class="font-semibold text-indigo-600">250,000+</span> students enrolled</p>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884974?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Learning Illustration" class="rounded-xl shadow-2xl floating max-w-md w-full">
+                    <div class="absolute -bottom-4 -right-4 bg-white p-4 rounded-xl shadow-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-indigo-100 rounded-lg mr-3">
+                                <i class="fas fa-medal text-indigo-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold">Certification</p>
+                                <p class="text-gray-600 text-sm">Completion Badge</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -top-6 -left-6 bg-white p-4 rounded-xl shadow-lg">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold">Career Boost</p>
+                                <p class="text-gray-600 text-sm">92% job placement</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-indigo-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <p class="text-4xl font-bold mb-2">250K+</p>
+                    <p class="text-indigo-200">Students</p>
+                </div>
+                <div>
+                    <p class="text-4xl font-bold mb-2">800+</p>
+                    <p class="text-indigo-200">Courses</p>
+                </div>
+                <div>
+                    <p class="text-4xl font-bold mb-2">5K+</p>
+                    <p class="text-indigo-200">Hours of Content</p>
+                </div>
+                <div>
+                    <p class="text-4xl font-bold mb-2">98%</p>
+                    <p class="text-indigo-200">Satisfaction Rate</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Popular Tech Courses</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Discover courses that will transform your career. Learn from industry experts at your own pace.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Course 1 -->
+                <div class="course-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="AI & Machine Learning" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-yellow-400 text-xs font-bold px-2 py-1 rounded-full">
+                            Bestseller
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="text-gray-500 ml-2 text-sm">4.8 (1.2k)</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">AI & Machine Learning Masterclass</h3>
+                        <p class="text-gray-600 mb-4">Learn to build intelligent systems with Python and TensorFlow from scratch.</p>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>60 hours</span>
+                            <i class="fas fa-user-graduate mx-3"></i>
+                            <span>Beginner to Advanced</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-gray-900">₹6,999</span>
+                                <span class="text-gray-500 line-through ml-2">₹14,999</span>
+                            </div>
+                            <button onclick="buyCourse('Course Name', 699900)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">>Enroll Now</button>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course 2 -->
+                <div class="course-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Full Stack Development" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-green-500 text-xs font-bold px-2 py-1 rounded-full text-white">
+                            New
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <span class="text-gray-500 ml-2 text-sm">4.5 (890)</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Full Stack Web Development</h3>
+                        <p class="text-gray-600 mb-4">Master MERN stack and build complete web applications with React and Node.js.</p>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>80 hours</span>
+                            <i class="fas fa-user-graduate mx-3"></i>
+                            <span>Beginner to Advanced</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-gray-900">₹5,999</span>
+                                <span class="text-gray-500 line-through ml-2">₹12,999</span>
+                            </div>
+                            <button 
+                                data-course="Full Stack Web Development" 
+                                onclick="buyCourse('Full Stack Web Development', 599900)" 
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">
+                                Enroll Now
+                            </button>
+
+
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course 3 -->
+                <div class="course-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1617791160536-598cf32026fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1364&q=80" 
+                             alt="Data Science" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="text-gray-500 ml-2 text-sm">5.0 (1.5k)</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Data Science & Analytics</h3>
+                        <p class="text-gray-600 mb-4">Become a data expert with Python, Pandas, NumPy, and visualization tools.</p>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>75 hours</span>
+                            <i class="fas fa-user-graduate mx-3"></i>
+                            <span>Intermediate to Advanced</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-gray-900">₹9,999</span>
+                                <span class="text-gray-500 line-through ml-2">₹15,999</span>
+                            </div>
+                            <button onclick="buyCourse('Course Name', 699900)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">Enroll Now</button>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- Course 3 -->
+                <div class="course-card bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1617791160536-598cf32026fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1364&q=80" 
+                             alt="Data Science" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center text-yellow-400 mb-2">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="text-gray-500 ml-2 text-sm">4.2 (1.9k)</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Frontend Development </h3>
+                        <p class="text-gray-600 mb-4">Learn HTML5 & CSS3 & Java Script to become a Frontend Expert.</p>
+                        <div class="flex items-center text-gray-500 text-sm mb-4">
+                            <i class="far fa-clock mr-1"></i>
+                            <span>28 hours</span>
+                            <i class="fas fa-user-graduate mx-3"></i>
+                            <span>Beginner to Intermediate</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xl font-bold text-gray-900">₹3,499</span>
+                                <span class="text-gray-500 line-through ml-2">₹8,999</span>
+                            </div>
+                           <button onclick="buyCourse('Course Name', 699900)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300">Enroll Now</button>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-6 py-3 rounded-md text-lg font-semibold transition duration-300">
+                    View All Courses
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Learn With <span class="gradient-text">Oura Tech</span></h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">We provide the best learning experience to help you achieve your career goals.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-laptop-code text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Hands-on Projects</h3>
+                    <p class="text-gray-600">Apply what you learn with real-world projects and build a portfolio that stands out to employers.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chalkboard-teacher text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Expert Instructors</h3>
+                    <p class="text-gray-600">Learn from industry experts who are passionate about teaching and have real-world experience.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-certificate text-orange-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Career Certificates</h3>
+                    <p class="text-gray-600">Earn certificates recognized by employers to showcase your skills and boost your career.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-clock text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Self-Paced Learning</h3>
+                    <p class="text-gray-600">Learn at your own pace with 24/7 access to course materials and unlimited support.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-comments text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Community Support</h3>
+                    <p class="text-gray-600">Join our vibrant community of learners and get help from peers and instructors.</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300 text-center">
+                    <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-briefcase text-pink-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Career Services</h3>
+                    <p class="text-gray-600">Get career guidance, resume reviews, and interview preparation to land your dream job.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-12 md:mb-0">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="About Oura Tech" class="rounded-xl shadow-xl w-full max-w-lg mx-auto">
+            </div>
+            <div class="md:w-1/2 md:pl-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">About <span class="gradient-text">Oura Tech</span></h2>
+                <p class="text-gray-600 mb-6">Founded in 2015, Oura Tech has grown from a small online learning platform to one of the leading tech education providers worldwide. Our mission is to make high-quality tech education accessible to everyone, everywhere.</p>
+                <p class="text-gray-600 mb-8">We believe that continuous learning and skill development are essential for success in today's rapidly evolving tech landscape. That's why we've assembled a team of industry experts to create comprehensive, practical courses that prepare you for real-world challenges.</p>
+                <div class="flex flex-wrap gap-4 mb-8">
+                    <span class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">800+ Courses</span>
+                    <span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">250K+ Students</span>
+                    <span class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">50+ Countries</span>
+                    <span class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">92% Success Rate</span>
+                </div>
+                <button class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center">
+                    <i class="fas fa-play-circle mr-2"></i> Watch Our Story
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 bg-indigo-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Success <span class="gradient-text">Stories</span></h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Hear from our students who have transformed their careers with Oura Tech.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Student" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Sarah Johnson</h4>
+                            <p class="text-gray-500 text-sm">Web Developer @ Google</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600">"The Full Stack Web Development course completely changed my career trajectory. Within 6 months of completing the course, I landed a job at Google. The projects were challenging but practical, exactly what employers look for."</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Student" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Michael Rodriguez</h4>
+                            <p class="text-gray-500 text-sm">Data Scientist @ Amazon</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600">"Coming from a non-technical background, I was skeptical about breaking into data science. Oura Tech's structured curriculum and hands-on projects gave me the confidence and skills I needed. Their career services helped me prepare for interviews, and now I'm working at Amazon!"</p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition duration-300">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Student" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-bold">Emily Chen</h4>
+                            <p class="text-gray-500 text-sm">Mobile Developer @ Facebook</p>
+                        </div>
+                    </div>
+                    <div class="flex mb-2">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                    <p class="text-gray-600">"I took the Mobile App Development course while working full-time in marketing. The course was so comprehensive that by the time I finished, I had 4 apps published on app stores. That portfolio helped me transition into a developer role at Facebook within a year."</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-gray-100 transition border border-indigo-600 font-medium">
+                    View More Success Stories
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Your Career?</h2>
+            <p class="text-xl text-indigo-100 mb-8 max-w-3xl mx-auto">Join thousands of learners who have gained in-demand tech skills with Oura Tech. Start your journey today with a free 7-day trial.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="openSignupModal()" class="px-8 py-4 bg-white text-indigo-600 rounded-lg hover:bg-gray-100 transition transform hover:-translate-y-1 font-bold text-lg shadow-lg">Get Started Free</button>
+                <button class="px-8 py-4 bg-transparent border-2 border-white rounded-lg hover:bg-white/10 transition transform hover:-translate-y-1 font-bold text-lg shadow-lg">Talk to an Advisor</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Contact <span class="gradient-text">Us</span></h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Have questions? Get in touch with our team. We're here to help!</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="john@example.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                            <input type="text" id="subject" name="subject" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="Course inquiry">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="Your message here..."></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="space-y-8">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-map-marker-alt text-indigo-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-bold text-gray-900">Our Headquarters</h3>
+                            <p class="text-gray-600 mt-1">123 Tech Avenue, Suite 400<br>San Francisco, CA 94107</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-envelope text-indigo-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-bold text-gray-900">Email Us</h3>
+                            <p class="text-gray-600 mt-1">support@ouratech.com<br>info@ouratech.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-phone-alt text-indigo-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-bold text-gray-900">Call Us</h3>
+                            <p class="text-gray-600 mt-1">+1 (800) 123-4567<br>Mon-Fri, 9am-5pm PST</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Connect With Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white text-lg font-semibold mb-4"><i class="fas fa-laptop-code mr-2"></i> Oura Tech</h3>
+                    <p class="mb-4">Empowering the next generation of tech professionals through accessible, high-quality education.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-white text-lg font-semibold mb-4">Courses</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Web Development</a></li>
+                        <li><a href="#" class="hover:text-white transition">Data Science</a></li>
+                        <li><a href="#" class="hover:text-white transition">Mobile Development</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cloud Computing</a></li>
+                        <li><a href="#" class="hover:text-white transition">Cybersecurity</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white text-lg font-semibold mb-4">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition">Press</a></li>
+                        <li><a href="#" class="hover:text-white transition">Partners</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-white text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white transition">Community</a></li>
+                        <li><a href="#" class="hover:text-white transition">Scholarships</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm mb-4 md:mb-0">© 2023 Oura Tech. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-sm hover:text-white transition">Terms</a>
+                    <a href="#" class="text-sm hover:text-white transition">Privacy</a>
+                    <a href="#" class="text-sm hover:text-white transition">Cookies</a>
+                    <a href="#" class="text-sm hover:text-white transition">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Welcome Back</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="loginErrorMessage" class="text-red-500 text-sm mb-4 hidden"></div>
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="loginEmail" name="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="your@email.com" required>
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="loginPassword" name="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="••••••••" required>
+                        <div class="flex justify-end mt-2">
+                            <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">Forgot password?</a>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm text-gray-600">Remember me</span>
+                        </label>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">Login</button>
+                    </div>
+                </form>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">Don't have an account? <button onclick="switchToSignup()" class="text-indigo-600 hover:text-indigo-500 font-medium">Sign up</button></p>
+                </div>
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-3 gap-3">
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-google text-red-500"></i>
+                        </a>
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-facebook-f text-blue-600"></i>
+                        </a>
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Create Your Account</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="signupErrorMessage" class="text-red-500 text-sm mb-4 hidden"></div>
+                <div id="signupSuccessMessage" class="text-green-500 text-sm mb-4 hidden"></div>
+                <form id="signupForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                            <input type="text" id="firstName" name="firstName" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="John" required>
+                        </div>
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="Doe" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="signupEmail" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                        <input type="email" id="signupEmail" name="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="your@email.com" required>
+                    </div>
+                    <div>
+                        <label for="signupPassword" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="signupPassword" name="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="••••••••" required>
+                    </div>
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-600 focus:border-transparent" placeholder="••••••••" required>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="terms" name="terms" type="checkbox" class="custom-checkbox" required>
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="terms" class="text-gray-600">I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500">Terms of Service</a> and <a href="#" class="text-indigo-600 hover:text-indigo-500">Privacy Policy</a></label>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">Create Account</button>
+                    </div>
+                </form>
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">Already have an account? <button onclick="switchToLogin()" class="text-indigo-600 hover:text-indigo-500 font-medium">Login</button></p>
+                </div>
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">Or sign up with</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-3 gap-3">
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-google text-red-500"></i>
+                        </a>
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-facebook-f text-blue-600"></i>
+                        </a>
+                        <a href="#" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+  // 2️⃣ Mobile menu toggle
+  document.getElementById('mobile-menu-button').addEventListener('click', function() {
+    const menu = document.getElementById('mobile-menu');
+    menu.classList.toggle('hidden');
+  });
+
+  // 3️⃣ Modal open/close
+  function openLoginModal() {
+    document.getElementById('loginModal').classList.remove('hidden');
+    document.getElementById('signupModal').classList.add('hidden');
+  }
+
+  function openSignupModal() {
+    document.getElementById('signupModal').classList.remove('hidden');
+    document.getElementById('loginModal').classList.add('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('signupModal').classList.add('hidden');
+  }
+
+  function switchToSignup() {
+    document.getElementById('loginModal').classList.add('hidden');
+    document.getElementById('signupModal').classList.remove('hidden');
+  }
+
+  function switchToLogin() {
+    document.getElementById('signupModal').classList.add('hidden');
+    document.getElementById('loginModal').classList.remove('hidden');
+  }
+
+  // 4️⃣ Signup Logic
+  document.getElementById('signupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+
+    const errorEl = document.getElementById('signupErrorMessage');
+    const successEl = document.getElementById('signupSuccessMessage');
+    errorEl.classList.add('hidden');
+    successEl.classList.add('hidden');
+
+    if (!terms) {
+      errorEl.textContent = 'You must agree to the terms';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      errorEl.textContent = 'Passwords do not match';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(() => {
+        successEl.textContent = 'Account created successfully!';
+        successEl.classList.remove('hidden');
+        document.getElementById('signupForm').reset();
+        setTimeout(closeModal, 2000);
+      })
+      .catch(error => {
+        errorEl.textContent = error.message;
+        errorEl.classList.remove('hidden');
+      });
+  });
+
+  // 5️⃣ Login Logic
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginErrorMessage');
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        errorEl.classList.add('hidden');
+        closeModal();
+      })
+      .catch(error => {
+        errorEl.textContent = error.message;
+        errorEl.classList.remove('hidden');
+      });
+  });
+
+  // 6️⃣ Google Sign-In
+  const googleBtnLogin = document.querySelector('#loginModal .fab.fa-google').closest('a');
+  const googleBtnSignup = document.querySelector('#signupModal .fab.fa-google').closest('a');
+
+  [googleBtnLogin, googleBtnSignup].forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          alert('Signed in as ' + (result.user.displayName || result.user.email));
+          closeModal();
+        })
+        .catch(err => alert(err.message));
+    });
+  });
+
+  // 7️⃣ Show user email in navbar after login
+ auth.onAuthStateChanged(user => {
+  if (user) {
+    const navRight = document.querySelector('nav .md\\:flex');
+    if (navRight) {
+      navRight.innerHTML = `
+        <a href="#courses" class="text-gray-700 hover:text-indigo-600 transition">Courses</a>
+        <a href="#about" class="text-gray-700 hover:text-indigo-600 transition">About</a>
+        <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition">Testimonials</a>
+        <a href="#contact" class="text-gray-700 hover:text-indigo-600 transition">Contact</a>
+        <span class="px-4 py-2 rounded-md text-indigo-600 font-bold">${user.displayName || user.email}</span>
+        <span onclick="auth.signOut()" class="cursor-pointer border-2.6 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-3 py-1.6 rounded-md text-1g font-normal transition duration-300">Logout</span>
+
+      `;
+    }
+  }
+});
+
+
+  // 8️⃣ Smooth Scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('mobile-menu').classList.add('hidden');
+    });
+  });
+
+  // 9️⃣ Shadow on Scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.classList.toggle('shadow-lg', window.scrollY > 10);
+  });
+
+  
+  function buyCourse(courseName, amountInPaise) {
+  var options = {
+    key: "rzp_test_pvULWHVximSNkM", // Replace with your Razorpay key
+    amount: amountInPaise,
+    currency: "INR",
+    name: "Oura Tech",
+    description: courseName,
+    image: "https://yourdomain.com/logo.png", // Optional
+    handler: function (response) {
+      alert("✅ Payment Successful! Payment ID: " + response.razorpay_payment_id);
+
+      // 🔁 Change button to 'Access Now'
+      const button = document.querySelector(`button[data-course='${courseName}']`);
+      if (button) {
+        button.textContent = 'Access Now';
+        button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+        button.onclick = function () {
+          // Redirect to your course dashboard
+          window.location.href = `dashboard.html?course=${encodeURIComponent(courseName)}`;
+        };
+      }
+    },
+    prefill: {
+      name: "", // You can auto-fill user name/email if available
+      email: ""
+    },
+    theme: {
+      color: "#4f46e5"
+    }
+  };
+
+  var rzp = new Razorpay(options);
+  rzp.open();
+}
+
+  
+
+
+</script>
+
+</body>
+</html>

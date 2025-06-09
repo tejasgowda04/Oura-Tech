@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | Oura Tech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        /* Custom styles */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .course-card:hover .course-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .course-overlay {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3B82F6 0%, #10B981 50%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% 100%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="font-sans bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white shadow-sm z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index2.html" class="flex items-center">
+                        <span class="text-indigo-600 text-2xl font-bold"><i class="fas fa-laptop-code mr-2"></i>Oura Tech</span>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index2.html#home" class="text-gray-700 hover:text-indigo-600 transition">Home</a>
+                    <a href="index2.html#courses" class="text-gray-700 hover:text-indigo-600 transition">Courses</a>
+                    <a href="#" class="text-indigo-600 font-medium">Dashboard</a>
+                    <div class="relative group">
+                        <button class="flex items-center space-x-1 text-gray-700 hover:text-indigo-600 transition">
+                            <span id="userNameNav">My Account</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Settings</a>
+                            <a href="#" id="logoutBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Logout</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-700">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg rounded-b-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index2.html#home" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Home</a>
+                <a href="index2.html#courses" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Courses</a>
+                <a href="#" class="block px-3 py-2 rounded-md bg-indigo-50 text-indigo-600">Dashboard</a>
+                <div class="pt-2 border-t border-gray-200">
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Profile</a>
+                    <a href="#" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Settings</a>
+                    <a href="#" id="mobileLogoutBtn" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <!-- Welcome Section -->
+        <div class="mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Welcome back, <span id="userName" class="gradient-text">Learner</span>!</h1>
+            <p class="text-gray-600">Continue your learning journey with Oura Tech</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Current Course Progress -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">Your Current Course</h2>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View all courses</a>
+                        </div>
+                        
+                        <div class="course-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition duration-300 relative">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Web Development Course" class="w-full h-48 object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <span class="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-semibold px-3 py-1 rounded-full">IN PROGRESS</span>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="text-xl font-bold text-gray-900">Full Stack Web Development</h3>
+                                    <div class="flex items-center text-yellow-400">
+                                        <i class="fas fa-star"></i>
+                                        <span class="ml-1 text-gray-600 font-semibold">4.9</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mb-4">Master HTML, CSS, JavaScript, React, Node.js, and MongoDB to build modern web applications.</p>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>Course Progress</span>
+                                        <span id="courseProgressPercent">35%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div id="courseProgressBar" class="bg-indigo-600 h-2 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center text-gray-500">
+                                        <i class="fas fa-clock mr-2"></i>
+                                        <span>12/34 lessons completed</span>
+                                    </div>
+                                    <button onclick="continueCourse()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+                                        Continue Learning
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course Modules -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Course Modules</h2>
+                        
+                        <div class="space-y-4">
+                            <!-- Module 1 -->
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition" onclick="toggleModule('module1')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
+                                            <span class="text-indigo-600 font-bold">1</span>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-gray-900">HTML & CSS Fundamentals</h3>
+                                    </div>
+                                    <i id="module1Icon" class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                                </button>
+                                <div id="module1" class="hidden px-4 pb-4">
+                                    <div class="pl-14 space-y-3">
+                                        <div class="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-100">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                                <span class="text-gray-800">Introduction to HTML</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">12 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-100">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                                <span class="text-gray-800">CSS Basics</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">18 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg bg-indigo-50 border border-indigo-100">
+                                            <div class="flex items-center">
+                                                <i class="fas fa-play-circle text-indigo-500 mr-3"></i>
+                                                <span class="text-gray-800">Responsive Design</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">25 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">CSS Flexbox & Grid</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">32 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">Project: Build a Portfolio</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">45 min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Module 2 -->
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition" onclick="toggleModule('module2')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
+                                            <span class="text-indigo-600 font-bold">2</span>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-gray-900">JavaScript Essentials</h3>
+                                    </div>
+                                    <i id="module2Icon" class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                                </button>
+                                <div id="module2" class="hidden px-4 pb-4">
+                                    <div class="pl-14 space-y-3">
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">JavaScript Basics</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">22 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">DOM Manipulation</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">28 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">ES6 Features</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">35 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">Project: Interactive App</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">50 min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Module 3 -->
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <button class="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition" onclick="toggleModule('module3')">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
+                                            <span class="text-indigo-600 font-bold">3</span>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-gray-900">React Framework</h3>
+                                    </div>
+                                    <i id="module3Icon" class="fas fa-chevron-down text-gray-500 transition-transform"></i>
+                                </button>
+                                <div id="module3" class="hidden px-4 pb-4">
+                                    <div class="pl-14 space-y-3">
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">React Introduction</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">30 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">Components & Props</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">25 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">State & Lifecycle</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">35 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">Hooks</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">40 min</span>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition cursor-pointer">
+                                            <div class="flex items-center">
+                                                <i class="far fa-circle text-gray-400 mr-3"></i>
+                                                <span class="text-gray-800">Project: React Portfolio</span>
+                                            </div>
+                                            <span class="text-sm text-gray-500">60 min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Deadlines -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Upcoming Deadlines</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start p-4 border border-gray-200 rounded-lg">
+                                <div class="flex-shrink-0 mt-1 mr-4">
+                                    <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                        <i class="fas fa-exclamation text-red-500"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="font-medium text-gray-900">Project Submission: Portfolio Website</h3>
+                                    <p class="text-sm text-gray-600">HTML & CSS Module</p>
+                                    <div class="flex items-center mt-2 text-sm text-gray-500">
+                                        <i class="far fa-clock mr-2"></i>
+                                        <span>Due in 3 days</span>
+                                    </div>
+                                </div>
+                                <button class="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                                    Submit
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-start p-4 border border-gray-200 rounded-lg">
+                                <div class="flex-shrink-0 mt-1 mr-4">
+                                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                        <i class="fas fa-book-open text-yellow-500"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="font-medium text-gray-900">Quiz: JavaScript Basics</h3>
+                                    <p class="text-sm text-gray-600">JavaScript Module</p>
+                                    <div class="flex items-center mt-2 text-sm text-gray-500">
+                                        <i class="far fa-clock mr-2"></i>
+                                        <span>Due in 1 week</span>
+                                    </div>
+                                </div>
+                                <button class="ml-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium">
+                                    Start Quiz
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-8">
+                <!-- User Profile Card -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6 text-center">
+                        <div class="flex justify-center mb-4">
+                            <div class="relative">
+                                <img id="userPhoto" src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-24 h-24 rounded-full border-4 border-indigo-100 object-cover">
+                                <button class="absolute bottom-0 right-0 w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white hover:bg-indigo-700 transition">
+                                    <i class="fas fa-pencil-alt text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 id="userFullName" class="text-xl font-bold text-gray-900 mb-1">John Doe</h3>
+                        <p id="userEmail" class="text-gray-600 mb-4">john.doe@example.com</p>
+                        <div class="flex justify-center space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Member since</span>
+                            <span id="memberSince" class="font-medium">Jan 2023</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Overview -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Your Progress</h3>
+                        
+                        <div class="flex justify-center mb-6">
+                            <div class="relative w-32 h-32">
+                                <svg class="w-full h-full" viewBox="0 0 100 100">
+                                    <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
+                                    <circle class="text-indigo-600 progress-ring__circle" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" stroke-dasharray="251.2" stroke-dashoffset="163.28" />
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span id="overallProgress" class="text-2xl font-bold">35%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Courses enrolled</span>
+                                <span id="coursesEnrolled" class="font-medium">3</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Courses completed</span>
+                                <span id="coursesCompleted" class="font-medium">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Certificates earned</span>
+                                <span id="certificatesEarned" class="font-medium">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Hours learned</span>
+                                <span id="hoursLearned" class="font-medium">12.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                        
+                        <div class="space-y-3">
+                            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-book text-indigo-600"></i>
+                                </div>
+                                <span class="font-medium">Browse Courses</span>
+                            </a>
+                            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-certificate text-green-600"></i>
+                                </div>
+                                <span class="font-medium">My Certificates</span>
+                            </a>
+                            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-briefcase text-blue-600"></i>
+                                </div>
+                                <span class="font-medium">Career Services</span>
+                            </a>
+                            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-cog text-purple-600"></i>
+                                </div>
+                                <span class="font-medium">Account Settings</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Community Forum -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Community Forum</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="User" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-medium">How to center a div?</h4>
+                                    <p class="text-sm text-gray-600">Posted by Sarah • 2h ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="User" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-medium">React state management</h4>
+                                    <p class="text-sm text-gray-600">Posted by Mike • 5h ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="User" class="w-10 h-10 rounded-full mr-3">
+                                <div>
+                                    <h4 class="font-medium">Node.js deployment help</h4>
+                                    <p class="text-sm text-gray-600">Posted by Emily • 1d ago</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+                            Join Discussion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+  apiKey: "AIzaSyD5B4x6FGf8fa08zDAyuLr-QuBbKU6oi6U",
+  authDomain: "oura-tech-auth.firebaseapp.com",
+  projectId: "oura-tech-auth",
+  storageBucket: "oura-tech-auth.firebasestorage.app",
+  messagingSenderId: "681353386666",
+  appId: "1:681353386666:web:f45d3e2aa33ae458718ed3",
+  measurementId: "G-7DHKLDSY5Y"
+};
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM elements
+        const logoutBtn = document.getElementById('logoutBtn');
+        const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+        const userName = document.getElementById('userName');
+        const userFullName = document.getElementById('userFullName');
+        const userEmail = document.getElementById('userEmail');
+        const userNameNav = document.getElementById('userNameNav');
+        const userPhoto = document.getElementById('userPhoto');
+        const memberSince = document.getElementById('memberSince');
+        const overallProgress = document.getElementById('overallProgress');
+        const coursesEnrolled = document.getElementById('coursesEnrolled');
+        const coursesCompleted = document.getElementById('coursesCompleted');
+        const certificatesEarned = document.getElementById('certificatesEarned');
+        const hoursLearned = document.getElementById('hoursLearned');
+        const courseProgressPercent = document.getElementById('courseProgressPercent');
+        const courseProgressBar = document.getElementById('courseProgressBar');
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Toggle module content
+        function toggleModule(moduleId) {
+            const module = document.getElementById(moduleId);
+            const icon = document.getElementById(moduleId + 'Icon');
+            
+            module.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+
+        // Continue course button
+        function continueCourse() {
+            alert('Redirecting to the next lesson...');
+            // In a real app, this would redirect to the specific lesson page
+        }
+
+        // Check auth state
+        auth.onAuthStateChanged(user => {
+           if (user) {
+        // 🆕 GET COURSE NAME FROM URL
+        const courseName = new URLSearchParams(window.location.search).get('course');
+        console.log("Accessed course:", courseName);
+
+        // Use courseName in the UI like this:
+        document.getElementById("userName").textContent = courseName || 'Learner';
+                // Set user photo if available
+                if (user.photoURL) {
+                    userPhoto.src = user.photoURL;
+                }
+                
+                // Get additional user data from Firestore
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        
+                        // Update member since date
+                        if (userData.createdAt) {
+                            const date = userData.createdAt.toDate();
+                            memberSince.textContent = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                        }
+                        
+                        // Update progress data
+                        if (userData.progress) {
+                            const progress = userData.progress;
+                            const progressPercent = Math.round(progress.overallCompletion * 100);
+                            
+                            overallProgress.textContent = `${progressPercent}%`;
+                            coursesEnrolled.textContent = progress.coursesEnrolled || 0;
+                            coursesCompleted.textContent = progress.coursesCompleted || 0;
+                            certificatesEarned.textContent = progress.certificatesEarned || 0;
+                            hoursLearned.textContent = progress.hoursLearned || 0;
+                            
+                            // Update course progress
+                            if (progress.currentCourse) {
+                                const courseProgress = Math.round(progress.currentCourse.completion * 100);
+                                courseProgressPercent.textContent = `${courseProgress}%`;
+                                courseProgressBar.style.width = `${courseProgress}%`;
+                                
+                                // Update progress ring
+                                const circle = document.querySelector('.progress-ring__circle');
+                                const radius = circle.r.baseVal.value;
+                                const circumference = radius * 2 * Math.PI;
+                                const offset = circumference - (progressPercent / 100) * circumference;
+                                circle.style.strokeDashoffset = offset;
+                            }
+                        }
+                    }
+                }).catch(error => {
+                    console.error('Error getting user document:', error);
+                });
+            } else {
+                // User is signed out
+                console.log('User not logged in');
+                // Redirect to login page
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Logout function
+        function logout() {
+            auth.signOut().then(() => {
+                console.log('User signed out');
+                window.location.href = 'index.html';
+            }).catch(error => {
+                console.error('Sign out error:', error);
+            });
+        }
+
+        // Add logout event listeners
+        logoutBtn.addEventListener('click', logout);
+        mobileLogoutBtn.addEventListener('click', logout);
+
+        // Navbar shadow on scroll
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 10) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // Initialize progress ring animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const circle = document.querySelector('.progress-ring__circle');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = circumference - (35 / 100) * circumference;
+        });
+    </script>
+</body>
+</html>
