@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oura Tech - Premium Course Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-animate {
+            animation: fadeIn 0.6s ease forwards;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .category-badge {
+            transition: all 0.3s ease;
+        }
+        .category-badge:hover {
+            transform: scale(1.05);
+        }
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            filter: blur(100px);
+            opacity: 0.2;
+            z-index: -1;
+        }
+        .blob-1 {
+            top: -100px;
+            right: -100px;
+        }
+        .blob-2 {
+            bottom: -100px;
+            left: -100px;
+            background: linear-gradient(45deg, #10b981, #3b82f6);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <div class="container mx-auto px-4 py-12">
+        <!-- Header Section -->
+        <div class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Unlock Your <span class="text-blue-600">Tech Potential</span></h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">Industry-relevant courses taught by experts. Transform your career with hands-on learning.</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap justify-center gap-4 mb-12">
+            <button data-filter="all" class="filter-btn active px-4 py-2 rounded-full bg-blue-600 text-white shadow hover:bg-blue-700 transition-all">All Courses</button>
+            <button data-filter="frontend" class="filter-btn px-4 py-2 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-all">Frontend</button>
+            <button data-filter="backend" class="filter-btn px-4 py-2 rounded-full bg-green-100 text-green-800 hover:bg-green-200 transition-all">Backend</button>
+            <button data-filter="fullstack" class="filter-btn px-4 py-2 rounded-full bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all">Full Stack</button>
+            <button data-filter="ai" class="filter-btn px-4 py-2 rounded-full bg-red-100 text-red-800 hover:bg-red-200 transition-all">AI/ML</button>
+            <button data-filter="cloud" class="filter-btn px-4 py-2 rounded-full bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-all">Cloud/DevOps</button>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="courses-container">
+            <!-- Cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Combo Deals Section -->
+        <div class="mt-24">
+            <h2 class="text-3xl font-bold text-center mb-8"><i class="fas fa-gift text-purple-600"></i> Supercharge Your Learning With <span class="text-purple-600">Combo Deals</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="combo-deal-card relative bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl overflow-hidden border border-purple-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        SAVE ₹3,499
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-2 text-gray-900">Full Stack + DSA + Resume</h3>
+                        <p class="text-gray-600 mb-4">Everything you need to become a complete developer and crack top tech interviews</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Full Stack</span>
+                            <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">DSA</span>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">Resume Prep</span>
+                        </div>
+                        <div class="flex items-center mb-6">
+                            <span class="text-2xl font-bold text-gray-900">₹7,499</span>
+                            <span class="ml-2 text-sm text-gray-500 line-through">₹11,497</span>
+                        </div>
+                        <button onclick="openRazorpay('Full Stack + DSA + Resume', 749900)" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all">
+                            <i class="fas fa-bolt mr-2"></i> Enroll Now (35% OFF)
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="combo-deal-card relative bg-gradient-to-r from-red-50 to-orange-50 rounded-xl overflow-hidden border border-red-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <div class="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        SAVE ₹4,999
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold mb-2 text-gray-900">AI/ML + DevOps + Projects</h3>
+                        <p class="text-gray-600 mb-4">Master AI and deploy your models with DevOps best practices and real-world projects</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">AI/ML</span>
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">DevOps</span>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Projects</span>
+                        </div>
+                        <div class="flex items-center mb-6">
+                            <span class="text-2xl font-bold text-gray-900">₹7,999</span>
+                            <span class="ml-2 text-sm text-gray-500 line-through">₹12,997</span>
+                        </div>
+                        <button onclick="openRazorpay('AI/ML + DevOps + Projects', 799900)" class="w-full bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 rounded-lg font-medium hover:from-red-700 hover:to-orange-700 transition-all">
+                            <i class="fas fa-bolt mr-2"></i> Enroll Now (38% OFF)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Course data
+        const courses = [
+            {
+                id: 1,
+                title: "Frontend Developer Pro",
+                price: 3499,
+                category: "frontend",
+                thumbnail: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                badge: "🔥 Best Seller",
+                skills: ["React 18", "Next.js", "TypeScript", "Tailwind CSS", "State Management"],
+                description: "Master modern frontend development with React ecosystem, build responsive UIs and learn industry best practices."
+            },
+            {
+                id: 2,
+                title: "Backend Developer Pro",
+                price: 3999,
+                category: "backend",
+                thumbnail: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                skills: ["Node.js", "Express", "REST APIs", "MongoDB", "Authentication"],
+                description: "Build scalable backend systems with Node.js, learn database design, and create secure APIs."
+            },
+            {
+                id: 3,
+                title: "Full Stack Developer Mastery",
+                price: 6999,
+                category: "fullstack",
+                thumbnail: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                badge: "💎 Premium",
+                skills: ["MERN Stack", "GraphQL", "Docker", "Testing", "Deployment"],
+                description: "Become a complete developer by mastering both frontend and backend with real-world projects."
+            },
+            {
+                id: 4,
+                title: "Mobile App Developer Pro",
+                price: 5499,
+                category: "mobile",
+                thumbnail: "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                skills: ["React Native", "Expo", "Mobile UI", "APIs", "Firebase"],
+                description: "Build cross-platform mobile apps with React Native and learn to deploy them to app stores."
+            },
+            {
+                id: 5,
+                title: "Cloud & DevOps Expert",
+                price: 4999,
+                category: "cloud",
+                thumbnail: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+                skills: ["AWS", "Docker", "Kubernetes", "CI/CD", "Terraform"],
+                description: "Master cloud infrastructure and DevOps practices to deploy and scale applications."
+            },
+            {
+                id: 6,
+                title: "AI & Machine Learning Engineer",
+                price: 7999,
+                category: "ai",
+                thumbnail: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
+                badge: "💎 Premium",
+                skills: ["Python", "TensorFlow", "Neural Networks", "NLP", "Computer Vision"],
+                description: "Learn AI/ML from fundamentals to advanced topics and build real-world applications."
+            },
+            {
+                id: 7,
+                title: "Cybersecurity Mastery Track",
+                price: 4499,
+                category: "security",
+                thumbnail: "https://images.unsplash.com/photo-1626785774573-4b799315345d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80",
+                skills: ["Ethical Hacking", "Pen Testing", "Security Tools", "Network Security"],
+                description: "Master cybersecurity fundamentals and learn to secure applications and systems."
+            },
+            {
+                id: 8,
+                title: "DSA + System Design Bundle",
+                price: 3999,
+                category: "programming",
+                thumbnail: "https://images.unsplash.com/photo-1639762681057-408e52192e55?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80",
+                badge: "🔥 Best Seller",
+                skills: ["Algorithms", "Data Structures", "System Design", "Interview Prep"],
+                description: "Ace technical interviews with comprehensive preparation in DSA and system design."
+            },
+            {
+                id: 9,
+                title: "Freelance Developer Pack",
+                price: 3499,
+                category: "business",
+                thumbnail: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80",
+                skills: ["Client Acquisition", "Contracts", "Invoicing", "Taxes", "Portfolio"],
+                description: "Everything you need to start and grow your freelance development business."
+            }
+        ];
+
+        // Razorpay integration
+        function openRazorpay(courseName, price) {
+            const options = {
+                "key": "rzp_test_YourTestKeyHere", // Replace with your test key
+                "amount": price,
+                "currency": "INR",
+                "name": "Oura Tech",
+                "description": courseName,
+                "image": "https://tejasgowda04.github.io/Oura-Tech/assets/img/oura-tech-logo.png",
+                "theme": {
+                    "color": "#2563EB"
+                },
+                "handler": function (response) {
+                    alert("Payment successful! Redirecting to dashboard...");
+                    // Redirect to dashboard or confirmation page
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+                },
+                "prefill": {
+                    "name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "contact": "9876543210"
+                }
+            };
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+        }
+
+        // Display courses
+        function displayCourses(filter = 'all') {
+            const container = document.getElementById('courses-container');
+            container.innerHTML = '';
+            
+            const filteredCourses = filter === 'all' ? courses : courses.filter(course => course.category === filter);
+            
+            filteredCourses.forEach((course, index) => {
+                const card = document.createElement('div');
+                card.className = `course-card bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ease-in-out border border-gray-100 card-animate`;
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.innerHTML = `
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="${course.thumbnail}" alt="${course.title}" class="w-full h-full object-cover">
+                        ${course.badge ? `<div class="absolute top-3 right-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">${course.badge}</div>` : ''}
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-gray-900">${course.title}</h3>
+                            <span class="px-3 py-1 ${getCategoryColor(course.category)} rounded-full text-sm font-medium category-badge">${getCategoryName(course.category)}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-4">${course.description}</p>
+                        
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-800 mb-2">What you'll learn:</h4>
+                            <ul class="space-y-1">
+                                ${course.skills.map(skill => `<li class="flex items-center text-gray-600"><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i> ${skill}</li>`).join('')}
+                            </ul>
+                        </div>
+                        
+                        <div class="flex items-center justify-between mt-6">
+                            <span class="text-xl font-bold text-gray-900">₹${course.price.toLocaleString()}</span>
+                            <button onclick="openRazorpay('${course.title}', ${course.price * 100})" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                                <i class="fas fa-shopping-cart mr-2"></i> Enroll Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Helper functions for category styling
+        function getCategoryColor(category) {
+            const colors = {
+                'frontend': 'bg-blue-100 text-blue-800',
+                'backend': 'bg-green-100 text-green-800',
+                'fullstack': 'bg-purple-100 text-purple-800',
+                'mobile': 'bg-indigo-100 text-indigo-800',
+                'cloud': 'bg-yellow-100 text-yellow-800',
+                'ai': 'bg-red-100 text-red-800',
+                'security': 'bg-gray-100 text-gray-800',
+                'programming': 'bg-cyan-100 text-cyan-800',
+                'business': 'bg-amber-100 text-amber-800'
+            };
+            return colors[category] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'frontend': 'Frontend',
+                'backend': 'Backend',
+                'fullstack': 'Full Stack',
+                'mobile': 'Mobile',
+                'cloud': 'Cloud',
+                'ai': 'AI/ML',
+                'security': 'Security',
+                'programming': 'Programming',
+                'business': 'Business'
+            };
+            return names[category] || 'Tech';
+        }
+
+        // Filter functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            displayCourses();
+            
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn === button) btn.classList.add('active');
+                    });
+                    
+                    const filter = button.getAttribute('data-filter');
+                    displayCourses(filter);
+                });
+            });
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('card-animate');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.course-card, .combo-deal-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
