@@ -869,12 +869,12 @@ const firebaseConfig = {
     </div>
 
 <script>
-  // Mobile menu toggle
-  document.getElementById('mobile-menu-button').addEventListener('click', function () {
+  // 🔧 Toggle Mobile Menu
+  document.getElementById('mobile-menu-button').addEventListener('click', () => {
     document.getElementById('mobile-menu').classList.toggle('hidden');
   });
 
-  // Modal controls
+  // 🔐 Modal Controls
   function openLoginModal() {
     document.getElementById('loginModal').classList.remove('hidden');
     document.getElementById('signupModal').classList.add('hidden');
@@ -891,25 +891,24 @@ const firebaseConfig = {
   }
 
   function switchToSignup() {
-    document.getElementById('loginModal').classList.add('hidden');
-    document.getElementById('signupModal').classList.remove('hidden');
+    openSignupModal();
   }
 
   function switchToLogin() {
-    document.getElementById('signupModal').classList.add('hidden');
-    document.getElementById('loginModal').classList.remove('hidden');
+    openLoginModal();
   }
 
-  // Signup logic
+  // 📝 Signup Logic
   document.getElementById('signupForm').addEventListener('submit', function (e) {
     e.preventDefault();
+
     const email = document.getElementById('signupEmail').value;
     const password = document.getElementById('signupPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const terms = document.getElementById('terms').checked;
-
     const errorEl = document.getElementById('signupErrorMessage');
     const successEl = document.getElementById('signupSuccessMessage');
+
     errorEl.classList.add('hidden');
     successEl.classList.add('hidden');
 
@@ -938,9 +937,10 @@ const firebaseConfig = {
       });
   });
 
-  // Login logic
+  // 🔓 Login Logic
   document.getElementById('loginForm').addEventListener('submit', function (e) {
     e.preventDefault();
+
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     const errorEl = document.getElementById('loginErrorMessage');
@@ -956,79 +956,94 @@ const firebaseConfig = {
       });
   });
 
-  // Google sign-in logic
-  const googleBtnLogin = document.querySelector('#loginModal .fab.fa-google').closest('a');
-  const googleBtnSignup = document.querySelector('#signupModal .fab.fa-google').closest('a');
-  [googleBtnLogin, googleBtnSignup].forEach(btn => {
+  // 🔐 Google Sign-In Logic
+  const googleButtons = [
+    document.querySelector('#loginModal .fab.fa-google')?.closest('a'),
+    document.querySelector('#signupModal .fab.fa-google')?.closest('a')
+  ];
+
+  googleButtons.forEach(btn => {
+    if (!btn) return;
+
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       const provider = new firebase.auth.GoogleAuthProvider();
+
       auth.signInWithPopup(provider)
         .then(result => {
           alert('Signed in as ' + (result.user.displayName || result.user.email));
           closeModal();
         })
-        .catch(err => alert(err.message));
+        .catch(error => {
+          if (error.code === 'auth/popup-closed-by-user') {
+            alert('Popup was closed before completing sign-in. Please try again.');
+          } else {
+            alert(error.message);
+          }
+        });
     });
   });
 
-  // Show user info and check purchases
+  // 👤 Show User Info and Update UI
   auth.onAuthStateChanged(user => {
-    if (user) {
-      // Update navbar
-      const navRight = document.querySelector('nav .md\\:flex');
-      if (navRight) {
-        navRight.innerHTML = `
-          <a href="#courses" class="text-gray-700 hover:text-indigo-600 transition">Courses</a>
-          <a href="#about" class="text-gray-700 hover:text-indigo-600 transition">About</a>
-          <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition">Testimonials</a>
-          <a href="#contact" class="text-gray-700 hover:text-indigo-600 transition">Contact</a>
-          <span class="px-4 py-2 rounded-md text-indigo-600 font-bold">${user.displayName || user.email}</span>
-          <span onclick="auth.signOut()" class="cursor-pointer border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium transition duration-300">Logout</span>
-        `;
-      }
+    if (!user) return;
 
-      const mobileMenu = document.getElementById('mobile-menu');
-      if (mobileMenu) {
-        mobileMenu.innerHTML = `
-          <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="#home" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Home</a>
-            <a href="#courses" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Courses</a>
-            <a href="#about" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">About</a>
-            <a href="#testimonials" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Testimonials</a>
-            <a href="#contact" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Contact</a>
-            <div class="pt-2 border-t border-gray-200">
-              <span class="block px-3 py-2 rounded-md text-gray-700 font-medium">${user.email}</span>
-              <span onclick="auth.signOut()" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 cursor-pointer">Logout</span>
-            </div>
-          </div>
-        `;
-      }
-
-      checkPurchasedCourses();
+    // Update desktop nav
+    const navRight = document.querySelector('nav .md\\:flex');
+    if (navRight) {
+      navRight.innerHTML = `
+        <a href="#courses" class="text-gray-700 hover:text-indigo-600 transition">Courses</a>
+        <a href="#about" class="text-gray-700 hover:text-indigo-600 transition">About</a>
+        <a href="#testimonials" class="text-gray-700 hover:text-indigo-600 transition">Testimonials</a>
+        <a href="#contact" class="text-gray-700 hover:text-indigo-600 transition">Contact</a>
+        <span class="px-4 py-2 rounded-md text-indigo-600 font-bold">${user.displayName || user.email}</span>
+        <span onclick="auth.signOut()" class="cursor-pointer border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium transition duration-300">Logout</span>
+      `;
     }
+
+    // Update mobile menu
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+      mobileMenu.innerHTML = `
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a href="#home" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Home</a>
+          <a href="#courses" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Courses</a>
+          <a href="#about" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">About</a>
+          <a href="#testimonials" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Testimonials</a>
+          <a href="#contact" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">Contact</a>
+          <div class="pt-2 border-t border-gray-200">
+            <span class="block px-3 py-2 rounded-md text-gray-700 font-medium">${user.email}</span>
+            <span onclick="auth.signOut()" class="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100 cursor-pointer">Logout</span>
+          </div>
+        </div>
+      `;
+    }
+
+    checkPurchasedCourses();
   });
 
+  // 🧠 Course Access Logic
   function checkPurchasedCourses() {
     const user = auth.currentUser;
-    if (user) {
-      const userKey = 'purchasedCourses_' + user.uid;
-      const purchasedCourses = JSON.parse(localStorage.getItem(userKey) || '{}');
+    if (!user) return;
 
-      document.querySelectorAll('[data-course]').forEach(button => {
-        const courseName = button.getAttribute('data-course');
-        if (purchasedCourses[courseName]) {
-          button.textContent = 'Access Now';
-          button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-          button.classList.add('bg-green-600', 'hover:bg-green-700');
-          button.onclick = function () {
-            window.location.href = `Dashboard/web-dev.html?course=${encodeURIComponent(courseName)}`;
-          };
-        }
-      });
-    }
+    const userKey = 'purchasedCourses_' + user.uid;
+    const purchasedCourses = JSON.parse(localStorage.getItem(userKey) || '{}');
+
+    document.querySelectorAll('[data-course]').forEach(button => {
+      const courseName = button.getAttribute('data-course');
+      if (purchasedCourses[courseName]) {
+        button.textContent = 'Access Now';
+        button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+        button.onclick = () => {
+          window.location.href = `Dashboard/web-dev.html?course=${encodeURIComponent(courseName)}`;
+        };
+      }
+    });
   }
 
+  // 💳 Payment & Purchase Handling
   function buyCourse(courseName, amountInPaise) {
     const user = auth.currentUser;
     if (!user) {
@@ -1036,7 +1051,7 @@ const firebaseConfig = {
       return;
     }
 
-    var options = {
+    const options = {
       key: "rzp_test_pvULWHVximSNkM",
       amount: amountInPaise,
       currency: "INR",
@@ -1056,7 +1071,7 @@ const firebaseConfig = {
           button.textContent = 'Access Now';
           button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
           button.classList.add('bg-green-600', 'hover:bg-green-700');
-          button.onclick = function () {
+          button.onclick = () => {
             window.location.href = `Dashboard/web-dev.html?course=${encodeURIComponent(courseName)}`;
           };
         });
@@ -1070,13 +1085,14 @@ const firebaseConfig = {
       }
     };
 
-    var rzp = new Razorpay(options);
+    const rzp = new Razorpay(options);
     rzp.open();
   }
 
-  // Load access buttons on page load
+  // 📦 Load course access on DOM ready
   document.addEventListener('DOMContentLoaded', checkPurchasedCourses);
 </script>
+
 
 
 </body>
